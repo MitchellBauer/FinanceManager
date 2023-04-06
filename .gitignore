@@ -131,3 +131,4 @@ dmypy.json
 
 # Microsoft Temporary Files
 ~$*
+FinanceManager/FinanceDB/FinanceManagerDB.db

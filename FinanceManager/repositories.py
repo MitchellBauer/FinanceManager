@@ -174,3 +174,35 @@ class AssetsRepository(BaseRepository):
         """Delete an asset."""
         query = "DELETE FROM assets WHERE id = ?"
         self.db.execute_query(query, (id,))
+
+class CategoriesRepository(BaseRepository):
+    def all(self):
+        """Retrieve all rows from the categories table."""
+        query = "SELECT * FROM Categories"
+        cursor = self.db.execute_query(query)
+        return cursor.fetchall()
+
+    def create(self, description, category):
+        """Create a new category."""
+        query = "INSERT INTO Categories (description, category) VALUES (?, ?)"
+        self.db.execute_query(query, (description, category))
+
+    def read(self, id):
+        """Retrieve a specific category by its ID."""
+        query = "SELECT * FROM Categories WHERE id = ?"
+        cursor = self.db.execute_query(query, (id,))
+        return cursor.fetchone()
+
+def read_by_description(self, description):
+    """Retrieve a category by its description.
+
+    Args:
+        description (str): The description of the category to retrieve.
+
+    Returns:
+        tuple: A tuple representing the category row, or None if the category is not found.
+    """
+    query = "SELECT * FROM categories WHERE description = ?"
+    cursor = self.db.execute_query(query, (description,))
+    return cursor.fetchone()
+
