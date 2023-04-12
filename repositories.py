@@ -1,6 +1,7 @@
 # repositories.py
 from database import Database
 
+
 # Base repository class that provides a template for other repository classes
 class BaseRepository:
     def __init__(self, db):
@@ -20,6 +21,7 @@ class BaseRepository:
 
     def delete(self, id):
         raise NotImplementedError
+
 
 # Repository class for handling transactions table CRUD operations
 class TransactionsRepository(BaseRepository):
@@ -57,6 +59,11 @@ class TransactionsRepository(BaseRepository):
         query = "UPDATE transactions SET income_id = ?, expense_id = ?, amount = ?, date = ? WHERE id = ?"
         self.db.execute_query(query, (income_id, expense_id, amount, date, id))
 
+    def update_category(self, id, category):
+        """Update the category of a transaction."""
+        query = "UPDATE transactions SET category = ? WHERE id = ?"
+        self.db.execute_query(query, (category, id))
+
     def delete(self, id):
         """Delete a transaction."""
         query = "DELETE FROM transactions WHERE id = ?"
@@ -70,10 +77,10 @@ class IncomeRepository(BaseRepository):
         cursor = self.db.execute_query(query)
         return cursor.fetchall()
 
-    def create(self, source, amount, date):
+    def create(self, name, amount, frequency):
         """Create a new income source."""
-        query = "INSERT INTO income (source, amount, date) VALUES (?, ?, ?)"
-        self.db.execute_query(query, (source, amount, date))
+        query = "INSERT INTO income (name, amount, frequency) VALUES (?, ?, ?)"
+        self.db.execute_query(query, (name, amount, frequency))
 
     def read(self, id):
         """Retrieve a specific income source by its ID."""
@@ -81,15 +88,16 @@ class IncomeRepository(BaseRepository):
         cursor = self.db.execute_query(query, (id,))
         return cursor.fetchone()
 
-    def update(self, id, source, amount, date):
+    def update(self, id, name, amount, frequency):
         """Update an income source."""
-        query = "UPDATE income SET source = ?, amount = ?, date = ? WHERE id = ?"
-        self.db.execute_query(query, (source, amount, date, id))
+        query = "UPDATE income SET name = ?, amount = ?, frequency = ? WHERE id = ?"
+        self.db.execute_query(query, (name, amount, frequency, id))
 
     def delete(self, id):
         """Delete an income source."""
         query = "DELETE FROM income WHERE id = ?"
         self.db.execute_query(query, (id,))
+
 
 class ExpensesRepository(BaseRepository):
     def all(self):
@@ -119,6 +127,7 @@ class ExpensesRepository(BaseRepository):
         query = "DELETE FROM expenses WHERE id = ?"
         self.db.execute_query(query, (id,))
 
+
 class LoansRepository(BaseRepository):
     def all(self):
         """Retrieve all rows from the loans table."""
@@ -146,6 +155,7 @@ class LoansRepository(BaseRepository):
         """Delete a loan."""
         query = "DELETE FROM loans WHERE id = ?"
         self.db.execute_query(query, (id,))
+
 
 class AssetsRepository(BaseRepository):
     def all(self):
@@ -175,6 +185,7 @@ class AssetsRepository(BaseRepository):
         query = "DELETE FROM assets WHERE id = ?"
         self.db.execute_query(query, (id,))
 
+
 class CategoriesRepository(BaseRepository):
     def all(self):
         """Retrieve all rows from the categories table."""
@@ -184,14 +195,15 @@ class CategoriesRepository(BaseRepository):
 
     def create(self, description, category):
         """Create a new category."""
-        query = "INSERT INTO Categories (description, category) VALUES (?, ?)"
-        self.db.execute_query(query, (description, category))
+        query = "INSERT INTO Categories (Name, Description) VALUES (?, ?)"
+        self.db.execute_query(query, (category, description))
 
     def read(self, id):
         """Retrieve a specific category by its ID."""
         query = "SELECT * FROM Categories WHERE id = ?"
         cursor = self.db.execute_query(query, (id,))
         return cursor.fetchone()
+
 
 def read_by_description(self, description):
     """Retrieve a category by its description.
@@ -205,4 +217,3 @@ def read_by_description(self, description):
     query = "SELECT * FROM categories WHERE description = ?"
     cursor = self.db.execute_query(query, (description,))
     return cursor.fetchone()
-

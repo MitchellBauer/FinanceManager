@@ -2,14 +2,17 @@ import sys
 import sqlite3
 from PySide6 import QtWidgets
 from database import Database
-from repositories import TransactionsRepository, IncomeRepository, ExpensesRepository, LoansRepository, AssetsRepository, CategoriesRepository
+from repositories import TransactionsRepository, IncomeRepository, ExpensesRepository, LoansRepository, \
+    AssetsRepository, CategoriesRepository
 from ofxparse import OfxParser
 from ClassMainWindow import MainWindow
+
 
 def import_ofx(file_path):
     with open(file_path) as file:
         ofx = OfxParser.parse(file)
     return ofx
+
 
 def parse_ofx(ofx):
     transactions = []
@@ -24,11 +27,15 @@ def parse_ofx(ofx):
             })
     return transactions
 
+
 def insert_update_transactions(transactions_repo, transactions):
     for transaction in transactions:
-        existing_transaction = transactions_repo.read_by_description_and_date(transaction['description'], transaction['date'])
+        existing_transaction = transactions_repo.read_by_description_and_date(transaction['description'],
+                                                                              transaction['date'])
         if not existing_transaction:
-            transactions_repo.create(transaction['account_id'], transaction['date'], transaction['amount'], transaction['description'], transaction['category'])
+            transactions_repo.create(transaction['account_id'], transaction['date'], transaction['amount'],
+                                     transaction['description'], transaction['category'])
+
 
 def update_categories(categories_repo, transactions_repo):
     transactions = transactions_repo.all()
@@ -36,7 +43,8 @@ def update_categories(categories_repo, transactions_repo):
         if transaction['category'] is None:
             category = categories_repo.read_by_description(transaction['description'])
             if category:
-                transactions_repo.update(transaction['id'], transaction['account_id'], transaction['date'], transaction['amount'], transaction['description'], category['category'])
+                transactions_repo.update(transaction['id'], transaction['account_id'], transaction['date'],
+                                         transaction['amount'], transaction['description'], category['category'])
 
 
 def show_warning_dialog():
@@ -45,6 +53,7 @@ def show_warning_dialog():
                                            "You need to load an .OFX file.",
                                            QtWidgets.QMessageBox.Ok)
     return warning_dialog.exec_()
+
 
 def open_file_dialog():
     file_dialog = QtWidgets.QFileDialog()
@@ -55,13 +64,12 @@ def open_file_dialog():
     return None
 
 
-
 def main():
     app = QtWidgets.QApplication(sys.argv)
 
     skip_dialog = True
- 
-    if skip_dialog == False:
+
+    if not skip_dialog:
         # Show warning dialog
         show_warning_dialog()
 
@@ -99,10 +107,11 @@ def main():
 
         window = MainWindow(db)
         window.show()
-        app.exec_()
+        app.exec()
 
         # Don't forget to close the database connection when you're done
         db.close()
+
 
 if __name__ == '__main__':
     main()
