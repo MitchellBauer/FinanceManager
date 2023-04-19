@@ -5,6 +5,7 @@ from MainWindow import Ui_MainWindow
 from repositories import TransactionsRepository, IncomeRepository, ExpensesRepository, LoansRepository, \
     AssetsRepository, CategoriesRepository
 from ClassAddIncomeDialog import AddIncomeDialog
+from ClassAddExpenseDialog import AddExpenseDialog
 
 
 class CategoryDelegate(QtWidgets.QStyledItemDelegate):
@@ -40,7 +41,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Initialize the repositories
         self.transactions_repo = TransactionsRepository(db)
         self.income_repo = IncomeRepository(db)
-        self.expenses_repo = ExpensesRepository(db)
+        self.expense_repo = ExpensesRepository(db)
         self.loans_repo = LoansRepository(db)
         self.assets_repo = AssetsRepository(db)
         self.categories_repo = CategoriesRepository(db)
@@ -65,6 +66,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Initialize the original income data
         self.original_income = None
 
+        # Expenses Tab
+        # Add the add expense button to the Expenses tab
+        self.addExpenseButton.clicked.connect(self.add_expense)
+        self.deleteExpenseButton.clicked.connect(self.delete_expense)
+        self.saveExpenseButton.clicked.connect(self.expense_update_changes)
+        # Initialize the original expense data
+        self.original_expenses = None
+
     def on_tab_changed(self, index):
         if index == 0:  # Transactions tab
             # TODO update Dashboard
@@ -73,8 +82,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # TODO update Budget
             pass
         elif index == 2:  # Expenses tab
-            pass
             # Update the Expenses tab with the loaded data
+            self.load_expenses()
+            self.saveExpenseButton.setEnabled(False)
         elif index == 3:  # Loans tab
             self.load_income()
             self.saveIncomeButton.setEnabled(False)
@@ -242,6 +252,89 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Reload the income data and disable the save button
             self.load_income()
             self.saveIncomeButton.setEnabled(False)
+
+        else:
+            # Warn the user that there are no changes to save
+            QtWidgets.QMessageBox.warning(self, "No Changes", "There are no changes to save.")
+
+    # Expenses Tab, load expense data from the database, and update the Expenses tab, columns ID, Name, Amount,
+    # Frequency
+    def load_expenses(self):
+        expenses = self.expense_repo.all()
+        self.original_expenses = expenses.copy()  # Store the original expense data
+
+        model = QStandardItemModel()
+        model.setHorizontalHeaderLabels(['ID', 'Name', 'Amount', 'Frequency'])
+
+        for e in expenses:
+            row = [
+                QStandardItem(str(e[0])),
+                QStandardItem(str(e[1])),
+                QStandardItem(str(e[2])),
+                QStandardItem(str(e[3])),
+            ]
+            model.appendRow(row)
+
+        self.expenseTableView.setModel(model)
+        self.expenseTableView.resizeColumnsToContents()  # Automatically adjust column widths
+
+        # Connect the dataChanged signal of the model to a slot that enables the saveButton
+        model.dataChanged.connect(self.expenses_on_data_changed)
+
+    def add_expense(self):
+        dialog = AddExpenseDialog(self, self.expense_repo)
+        result = dialog.exec()
+
+        if result == QDialog.Accepted:
+            self.load_expenses()
+
+    def delete_expense(self):
+        # Get the selected indexes from the expenseTableView
+        selected_indexes = self.expenseTableView.selectedIndexes()
+
+        if selected_indexes:
+            # Get the selected row
+            row = selected_indexes[0].row()
+
+            # Get the expense ID from the first column of the selected row
+            expense_id = int(self.expenseTableView.model().item(row, 0).text())
+
+            # Delete the expense from the SQLite database
+            self.expense_repo.delete(expense_id)
+
+            # Remove the row from the expenseTableView
+            self.expenseTableView.model().removeRow(row)
+
+            # Display a message box to inform the user that the row was deleted
+            QtWidgets.QMessageBox.information(self, "Row Deleted", "The selected row has been deleted.")
+
+        else:
+            # Display a message box to inform the user to select a row
+            QtWidgets.QMessageBox.warning(self, "No Row Selected", "Please select a row to delete.")
+
+    def expenses_on_data_changed(self, topLeft, bottomRight):
+        self.saveExpenseButton.setEnabled(True)
+
+    def expense_update_changes(self):
+        current_expenses = []
+        for row in range(self.expenseTableView.model().rowCount()):
+            expense = [
+                int(self.expenseTableView.model().index(row, 0).data()),
+                self.expenseTableView.model().index(row, 1).data(),
+                float(self.expenseTableView.model().index(row, 2).data()),
+                int(self.expenseTableView.model().index(row, 3).data()),
+            ]
+            current_expenses.append(expense)
+
+        # Compare the current expense data with the original data
+        if current_expenses != self.original_expenses:
+            # Save the changes to the Expenses table
+            for expense in current_expenses:
+                self.expense_repo.update(expense[0], expense[1], expense[2], expense[3])
+
+            # Reload the expense data and disable the save button
+            self.load_expenses()
+            self.saveExpenseButton.setEnabled(False)
 
         else:
             # Warn the user that there are no changes to save

@@ -102,31 +102,30 @@ class IncomeRepository(BaseRepository):
 class ExpensesRepository(BaseRepository):
     def all(self):
         """Retrieve all rows from the expenses table."""
-        query = "SELECT * FROM expenses"
+        query = "SELECT * FROM Expenses"
         cursor = self.db.execute_query(query)
         return cursor.fetchall()
 
-    def create(self, category, amount, date):
-        """Create a new expense category."""
-        query = "INSERT INTO expenses (category, amount, date) VALUES (?, ?, ?)"
-        self.db.execute_query(query, (category, amount, date))
+    def create(self, name, amount, frequency):
+        """Create a new expense."""
+        query = "INSERT INTO Expenses (Name, Amount, Frequency) VALUES (?, ?, ?)"
+        self.db.execute_query(query, (name, amount, frequency))
 
     def read(self, id):
-        """Retrieve a specific expense category by its ID."""
-        query = "SELECT * FROM expenses WHERE id = ?"
+        """Retrieve a specific expense by its ID."""
+        query = "SELECT * FROM Expenses WHERE ID = ?"
         cursor = self.db.execute_query(query, (id,))
         return cursor.fetchone()
 
-    def update(self, id, category, amount, date):
-        """Update an expense category."""
-        query = "UPDATE expenses SET category = ?, amount = ?, date = ? WHERE id = ?"
-        self.db.execute_query(query, (category, amount, date, id))
+    def update(self, id, name, amount, frequency):
+        """Update an expense."""
+        query = "UPDATE Expenses SET Name = ?, Amount = ?, Frequency = ? WHERE ID = ?"
+        self.db.execute_query(query, (name, amount, frequency, id))
 
     def delete(self, id):
-        """Delete an expense category."""
-        query = "DELETE FROM expenses WHERE id = ?"
+        """Delete an expense."""
+        query = "DELETE FROM Expenses WHERE ID = ?"
         self.db.execute_query(query, (id,))
-
 
 class LoansRepository(BaseRepository):
     def all(self):

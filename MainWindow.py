@@ -39,6 +39,18 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.budgetTab, "")
         self.expensesTab = QWidget()
         self.expensesTab.setObjectName(u"expensesTab")
+        self.expenseTableView = QTableView(self.expensesTab)
+        self.expenseTableView.setObjectName(u"expenseTableView")
+        self.expenseTableView.setGeometry(QRect(0, 0, 801, 431))
+        self.addExpenseButton = QPushButton(self.expensesTab)
+        self.addExpenseButton.setObjectName(u"addExpenseButton")
+        self.addExpenseButton.setGeometry(QRect(10, 460, 93, 28))
+        self.deleteExpenseButton = QPushButton(self.expensesTab)
+        self.deleteExpenseButton.setObjectName(u"deleteExpenseButton")
+        self.deleteExpenseButton.setGeometry(QRect(120, 460, 93, 28))
+        self.saveExpenseButton = QPushButton(self.expensesTab)
+        self.saveExpenseButton.setObjectName(u"saveExpenseButton")
+        self.saveExpenseButton.setGeometry(QRect(240, 460, 93, 28))
         self.tabWidget.addTab(self.expensesTab, "")
         self.incomeTab = QWidget()
         self.incomeTab.setObjectName(u"incomeTab")
@@ -87,7 +99,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(6)
+        self.tabWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -97,6 +109,9 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.dashboardTab), QCoreApplication.translate("MainWindow", u"Dashboard", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.budgetTab), QCoreApplication.translate("MainWindow", u"Budget", None))
+        self.addExpenseButton.setText(QCoreApplication.translate("MainWindow", u"Add", None))
+        self.deleteExpenseButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
+        self.saveExpenseButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.expensesTab), QCoreApplication.translate("MainWindow", u"Expenses", None))
         self.addIncomeButton.setText(QCoreApplication.translate("MainWindow", u"Add", None))
         self.saveIncomeButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))
