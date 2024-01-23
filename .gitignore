@@ -133,3 +133,4 @@ dmypy.json
 ~$*
 FinanceManager/FinanceDB/FinanceManagerDB.db
 *.db
+FinanceDB/FinanceManagerDB.db

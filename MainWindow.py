@@ -69,6 +69,18 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.incomeTab, "")
         self.loansTab = QWidget()
         self.loansTab.setObjectName(u"loansTab")
+        self.loanTableView = QTableView(self.loansTab)
+        self.loanTableView.setObjectName(u"loanTableView")
+        self.loanTableView.setGeometry(QRect(0, 0, 801, 431))
+        self.addLoanButton = QPushButton(self.loansTab)
+        self.addLoanButton.setObjectName(u"addLoanButton")
+        self.addLoanButton.setGeometry(QRect(20, 460, 93, 28))
+        self.deleteLoanButton = QPushButton(self.loansTab)
+        self.deleteLoanButton.setObjectName(u"deleteLoanButton")
+        self.deleteLoanButton.setGeometry(QRect(140, 460, 93, 28))
+        self.saveLoanButton = QPushButton(self.loansTab)
+        self.saveLoanButton.setObjectName(u"saveLoanButton")
+        self.saveLoanButton.setGeometry(QRect(250, 460, 93, 28))
         self.tabWidget.addTab(self.loansTab, "")
         self.assetsTab = QWidget()
         self.assetsTab.setObjectName(u"assetsTab")
@@ -99,7 +111,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(4)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -117,6 +129,9 @@ class Ui_MainWindow(object):
         self.saveIncomeButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.deleteIncomeButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.incomeTab), QCoreApplication.translate("MainWindow", u"Income", None))
+        self.addLoanButton.setText(QCoreApplication.translate("MainWindow", u"Add", None))
+        self.deleteLoanButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
+        self.saveLoanButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.loansTab), QCoreApplication.translate("MainWindow", u"Loans", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.assetsTab), QCoreApplication.translate("MainWindow", u"Assets", None))
         self.saveTransactionButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))

@@ -130,29 +130,29 @@ class ExpensesRepository(BaseRepository):
 class LoansRepository(BaseRepository):
     def all(self):
         """Retrieve all rows from the loans table."""
-        query = "SELECT * FROM loans"
+        query = "SELECT * FROM Loans"
         cursor = self.db.execute_query(query)
         return cursor.fetchall()
 
-    def create(self, name, amount, interest_rate, start_date):
+    def create(self, name, monthly_payment, remaining_balance, starting_date, apr, last_payment, next_payment):
         """Create a new loan."""
-        query = "INSERT INTO loans (name, amount, interest_rate, start_date) VALUES (?, ?, ?, ?)"
-        self.db.execute_query(query, (name, amount, interest_rate, start_date))
+        query = "INSERT INTO Loans (Name, Monthly_Payment, Remaining_Balance, Starting_Date, APR, Last_Payment, Next_Payment) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        self.db.execute_query(query, (name, monthly_payment, remaining_balance, starting_date, apr, last_payment, next_payment))
 
     def read(self, id):
         """Retrieve a specific loan by its ID."""
-        query = "SELECT * FROM loans WHERE id = ?"
+        query = "SELECT * FROM Loans WHERE ID = ?"
         cursor = self.db.execute_query(query, (id,))
         return cursor.fetchone()
 
-    def update(self, id, name, amount, interest_rate, start_date):
+    def update(self, id, name, monthly_payment, remaining_balance, starting_date, apr, last_payment, next_payment):
         """Update a loan."""
-        query = "UPDATE loans SET name = ?, amount = ?, interest_rate = ?, start_date = ? WHERE id = ?"
-        self.db.execute_query(query, (name, amount, interest_rate, start_date, id))
+        query = "UPDATE Loans SET Name = ?, Monthly_Payment = ?, Remaining_Balance = ?, Starting_Date = ?, APR = ?, Last_Payment = ?, Next_Payment = ? WHERE ID = ?"
+        self.db.execute_query(query, (name, monthly_payment, remaining_balance, starting_date, apr, last_payment, next_payment, id))
 
     def delete(self, id):
         """Delete a loan."""
-        query = "DELETE FROM loans WHERE id = ?"
+        query = "DELETE FROM Loans WHERE ID = ?"
         self.db.execute_query(query, (id,))
 
 

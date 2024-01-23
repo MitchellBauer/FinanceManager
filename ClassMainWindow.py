@@ -1,11 +1,12 @@
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtGui import QStandardItemModel, QStandardItem
-from PySide6.QtWidgets import QComboBox, QDialog
+from PySide6.QtWidgets import QComboBox, QDialog, QMessageBox
 from MainWindow import Ui_MainWindow
 from repositories import TransactionsRepository, IncomeRepository, ExpensesRepository, LoansRepository, \
     AssetsRepository, CategoriesRepository
 from ClassAddIncomeDialog import AddIncomeDialog
 from ClassAddExpenseDialog import AddExpenseDialog
+from ClassAddLoanDialog import AddLoanDialog
 
 
 class CategoryDelegate(QtWidgets.QStyledItemDelegate):
@@ -74,6 +75,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Initialize the original expense data
         self.original_expenses = None
 
+        # Loans Tab
+        # Add the add loan button to the Loans tab
+        self.addLoanButton.clicked.connect(self.add_loan)
+        self.deleteLoanButton.clicked.connect(self.delete_loan)
+        self.saveLoanButton.clicked.connect(self.loan_update_changes)
+        # Initialize the original loan data
+        self.original_loans = None
+
     def on_tab_changed(self, index):
         if index == 0:  # Transactions tab
             # TODO update Dashboard
@@ -90,11 +99,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.saveIncomeButton.setEnabled(False)
             # Update the Income tab with the loaded data
         elif index == 4:  # Assets tab
-            pass
             # Update the Loans tab with the loaded data
+            self.load_loans()
+            self.saveIncomeButton.setEnabled(False)
         elif index == 5:
-            pass
             # Update the Assets tab with the loaded data
+            pass
         elif index == 6:
             self.load_transactions()  # Call the load_transactions method
             self.saveTransactionButton.setEnabled(False)  # Disable the save button by default
@@ -170,7 +180,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         else:
             # Warn the user that there are no changes to save
-            QtWidgets.QMessageBox.warning(self, "No Changes", "There are no changes to save.")
+            QMessageBox.warning(self, "No Changes", "There are no changes to save.")
 
     def closeEvent(self, event):
         self.db.close()
@@ -223,11 +233,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.incomeTableView.model().removeRow(row)
 
             # Display a message box to inform the user that the row was deleted
-            QtWidgets.QMessageBox.information(self, "Row Deleted", "The selected row has been deleted.")
+            QMessageBox.information(self, "Row Deleted", "The selected row has been deleted.")
 
         else:
             # Display a message box to inform the user to select a row
-            QtWidgets.QMessageBox.warning(self, "No Row Selected", "Please select a row to delete.")
+            QMessageBox.warning(self, "No Row Selected", "Please select a row to delete.")
 
     def income_on_data_changed(self, topLeft, bottomRight):
         self.saveIncomeButton.setEnabled(True)
@@ -255,7 +265,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         else:
             # Warn the user that there are no changes to save
-            QtWidgets.QMessageBox.warning(self, "No Changes", "There are no changes to save.")
+            QMessageBox.warning(self, "No Changes", "There are no changes to save.")
 
     # Expenses Tab, load expense data from the database, and update the Expenses tab, columns ID, Name, Amount,
     # Frequency
@@ -306,11 +316,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.expenseTableView.model().removeRow(row)
 
             # Display a message box to inform the user that the row was deleted
-            QtWidgets.QMessageBox.information(self, "Row Deleted", "The selected row has been deleted.")
+            QMessageBox.information(self, "Row Deleted", "The selected row has been deleted.")
 
         else:
             # Display a message box to inform the user to select a row
-            QtWidgets.QMessageBox.warning(self, "No Row Selected", "Please select a row to delete.")
+            QMessageBox.warning(self, "No Row Selected", "Please select a row to delete.")
 
     def expenses_on_data_changed(self, topLeft, bottomRight):
         self.saveExpenseButton.setEnabled(True)
@@ -338,4 +348,99 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         else:
             # Warn the user that there are no changes to save
-            QtWidgets.QMessageBox.warning(self, "No Changes", "There are no changes to save.")
+            QMessageBox.warning(self, "No Changes", "There are no changes to save.")
+
+    # Loans Tab, load loan data from the database, and update the Loans tab, columns ID, Name, Monthly_Payment,
+    # Remaining_Balance, Starting_Date, APR, Last_Payment, Next_Payment
+    def load_loans(self):
+        loans = self.loans_repo.all()
+        self.original_loans = loans.copy()  # Store the original loan data
+
+        model = QStandardItemModel()
+        model.setHorizontalHeaderLabels(
+            ['ID', 'Name', 'Monthly Payment', 'Remaining Balance', 'Starting Date', 'APR', 'Last Payment',
+             'Next Payment'])
+
+        for l in loans:
+            row = [
+                QStandardItem(str(l[0])),
+                QStandardItem(str(l[1])),
+                QStandardItem(str(l[2])),
+                QStandardItem(str(l[3])),
+                QStandardItem(str(l[4])),
+                QStandardItem(str(l[5])),
+                QStandardItem(str(l[6])),
+                QStandardItem(str(l[7])),
+            ]
+            model.appendRow(row)
+
+        self.loanTableView.setModel(model)
+        self.loanTableView.resizeColumnsToContents()  # Automatically adjust column widths
+
+        # Connect the dataChanged signal of the model to a slot that enables the saveButton
+        model.dataChanged.connect(self.loans_on_data_changed)
+
+    def add_loan(self):
+        dialog = AddLoanDialog(self, self.loans_repo)
+        result = dialog.exec()
+
+        if result == QDialog.Accepted:
+            self.load_loans()
+
+    def delete_loan(self):
+        # Get the selected indexes from the loanTableView
+        selected_indexes = self.loanTableView.selectedIndexes()
+
+        if selected_indexes:
+            # Get the selected row
+            row = selected_indexes[0].row()
+
+            # Get the loan ID from the first column of the selected row
+            loan_id = int(self.loanTableView.model().item(row, 0).text())
+
+            # Delete the loan from the SQLite database
+            self.loans_repo.delete(loan_id)
+
+            # Remove the row from the loanTableView
+            self.loanTableView.model().removeRow(row)
+
+            # Display a message box to inform the user that the row was deleted
+            QMessageBox.information(self, "Row Deleted", "The selected row has been deleted.")
+
+        else:
+            # Display a message box to inform the user to select a row
+            QMessageBox.warning(self, "No Row Selected", "Please select a row to delete.")
+
+    def loans_on_data_changed(self, topLeft, bottomRight):
+        self.saveLoanButton.setEnabled(True)
+
+    def loan_update_changes(self):
+        current_loans = []
+        for row in range(self.loanTableView.model().rowCount()):
+            loan = [
+                int(self.loanTableView.model().index(row, 0).data()),
+                self.loanTableView.model().index(row, 1).data(),
+                float(self.loanTableView.model().index(row, 2).data()),
+                float(self.loanTableView.model().index(row, 3).data()),
+                self.loanTableView.model().index(row, 4).data(),
+                float(self.loanTableView.model().index(row, 5).data()),
+                self.loanTableView.model().index(row, 6).data(),
+                self.loanTableView.model().index(row, 7).data(),
+            ]
+            current_loans.append(loan)
+
+        # Compare the current loan data with the original data
+        if current_loans != self.original_loans:
+            # Save the changes to the Loans table
+            for loan in current_loans:
+                self.loans_repo.update(loan[0], loan[1], loan[2], loan[3], loan[4], loan[5], loan[6], loan[7])
+
+            # Reload the loan data and disable the save button
+            self.load_loans()
+            self.saveLoanButton.setEnabled(False)
+
+        else:
+            # Warn the user that there are no changes to save
+            QMessageBox.warning(self, "No Changes", "There are no changes to save.")
+
+
